@@ -53,8 +53,9 @@ def indraStatementToDict(stmt):
     ea = EnglishAssembler([stmt])
     txt = ea.make_model()
     pmid = stmt.evidence[0].pmid
+    _type = get_type(stmt)
 
-    return {'pmid': pmid, 'text': txt}
+    return {'pmid': pmid, 'text': txt, 'type': _type}
 
 def is_negative_stmt(stmt):
     return is_negative_stmt_type(get_type(stmt))
