@@ -1,4 +1,5 @@
 from config import read_from_config
+from entity_sign import EntitySign
 
 from indra.assemblers.english import EnglishAssembler
 from bioagents.msa.msa import MSA
@@ -29,19 +30,22 @@ def get_agent(name):
     GroundingMapper.standardize_agent_name(agent, standardize_refs=True)
     return agent
 
-def interactionFinder(sources):
-    agents = list(map(get_agent, sources))
+def interactionFinder(entities, sign):
+    agents = list(map(get_agent, entities))
 
-    meth='binary_undirected'
+    meth = 'binary_undirected' if sign == EntitySign.UNSIGNED else 'binary_directed'
     finder = msa.find_mechanisms(meth, *agents)
 
     stmts = finder.get_statements(block=True)
 
+    filter_fcn = is_negative_stmt if sign == EntitySign.NEGATIVE else is_not_negative_stmt
+    stmts = filter(filter_fcn, stmts)
+
     dicts = list(map(indraStatementToDict , stmts))
     return dicts
 
-def interactionFinderJsonStr(sources):
-    dicts = interactionFinder(sources)
+def interactionFinderJsonStr(entities, sign):
+    dicts = interactionFinder(entities, sign)
     jsons = json.dumps(dicts)
     return jsons
 
@@ -51,3 +55,19 @@ def indraStatementToDict(stmt):
     pmid = stmt.evidence[0].pmid
 
     return {'pmid': pmid, 'text': txt}
+
+def is_negative_stmt(stmt):
+    return is_negative_stmt_type(get_type(stmt))
+
+def is_not_negative_stmt(stmt):
+    return not is_negative_stmt(stmt)
+
+def is_negative_stmt_type(_type):
+    return _type == 'Inhibition'\
+            or _type.startswith('De')\
+            or _type.startswith('Un')\
+            or _type.startswith('Decrease')
+
+
+def get_type(o):
+    return type(o).__name__

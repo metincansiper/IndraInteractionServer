@@ -1,5 +1,6 @@
 from finder import interactionFinderJsonStr
 from config import read_from_config
+from entity_sign import EntitySign
 
 from http.server import HTTPServer, BaseHTTPRequestHandler
 from urllib.parse import urlparse
@@ -14,7 +15,17 @@ class SimpleHTTPRequestHandler(BaseHTTPRequestHandler):
         query = urllib.parse.parse_qs(o.query)
 
         if path == '/find-interactions':
-            resp = find_interactions(query['source'])
+            sign = EntitySign.UNSIGNED
+            if 'sign' in query:
+                sign = query['sign'][0]
+
+            entities = query['source']
+            if sign is not EntitySign.UNSIGNED:
+                entities = entities + query['target']
+
+            print(entities)
+
+            resp = find_interactions(entities, sign)
             return self.wrap_response(to_bytes(resp))
 
     def wrap_response(self, resp):
@@ -25,12 +36,8 @@ class SimpleHTTPRequestHandler(BaseHTTPRequestHandler):
 def to_bytes(r):
     return bytes(r.encode("utf-8"))
 
-def find_interactions(sources):
-    return interactionFinderJsonStr(sources)
-
-# port = 8000
-# if 'PORT' in os.environ:
-#     port = os.environ['PORT']
+def find_interactions(entities, sign):
+    return interactionFinderJsonStr(entities, sign)
 
 port = read_from_config('PORT')
 
