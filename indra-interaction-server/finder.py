@@ -1,12 +1,36 @@
+from config import read_from_config
+
 from indra.assemblers.english import EnglishAssembler
-from clare.capabilities.util import get_agent_from_gene_name
 from bioagents.msa.msa import MSA
+from indra.statements import Agent
+from indra.databases import hgnc_client, chebi_client
+from indra.preassembler.grounding_mapper import GroundingMapper
+
 import json
+import requests
 
 msa = MSA()
 
-def interactionFinder(genes):
-    agents = list(map(get_agent_from_gene_name, genes))
+def get_agent(name):
+    opts = {'text': name}
+
+    indra_url = read_from_config('INDRA_GROUND_URL')
+    res = requests.post(indra_url, json=opts)
+
+    if res.status_code != 200 and not res.json():
+        return Agent(name, db_refs={'TEXT': name})
+
+    js = res.json()
+    top_term = js[0]['term']
+
+    agent = Agent(name, db_refs={'TEXT': name,
+                              top_term['db']: top_term['id']})
+
+    GroundingMapper.standardize_agent_name(agent, standardize_refs=True)
+    return agent
+
+def interactionFinder(sources):
+    agents = list(map(get_agent, sources))
 
     meth='binary_undirected'
     finder = msa.find_mechanisms(meth, *agents)
@@ -16,8 +40,8 @@ def interactionFinder(genes):
     dicts = list(map(indraStatementToDict , stmts))
     return dicts
 
-def interactionFinderJsonStr(genes):
-    dicts = interactionFinder(genes)
+def interactionFinderJsonStr(sources):
+    dicts = interactionFinder(sources)
     jsons = json.dumps(dicts)
     return jsons
 
