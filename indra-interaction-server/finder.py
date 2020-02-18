@@ -33,12 +33,21 @@ def get_agent(name):
 def interactionFinder(entities, sign):
     agents = list(map(get_agent, entities))
 
+    # TODO: Does sign parameter needed? Should always use 'binary_undirected'?
     meth = 'binary_undirected' if sign == EntitySign.UNSIGNED else 'binary_directed'
     finder = msa.find_mechanisms(meth, *agents)
 
     stmts = finder.get_statements(block=True)
 
-    filter_fcn = is_negative_stmt if sign == EntitySign.NEGATIVE else is_not_negative_stmt
+    filter_fcn = None
+
+    if sign == EntitySign.UNSIGNED:
+        filter_fcn = is_unsigned_stmt
+    elif sign == EntitySign.POSITIVE:
+        filter_fcn = is_positive_stmt
+    elif sign == EntitySign.NEGATIVE:
+        filter_fcn = is_negative_stmt
+
     stmts = filter(filter_fcn, stmts)
 
     dicts = list(map(indraStatementToDict , stmts))
@@ -60,14 +69,26 @@ def indraStatementToDict(stmt):
 def is_negative_stmt(stmt):
     return is_negative_stmt_type(get_type(stmt))
 
-def is_not_negative_stmt(stmt):
-    return not is_negative_stmt(stmt)
+def is_positive_stmt(stmt):
+    return is_positive_stmt_type(get_type(stmt))
 
+def is_unsigned_stmt(stmt):
+    return is_unsigned_stmt_type(get_type(stmt))
+
+# TODO: Revise what is positive/negative/unsigned.
+# Current implementations are to be used temporarily.
 def is_negative_stmt_type(_type):
     return _type == 'Inhibition'\
             or _type.startswith('De')\
             or _type.startswith('Un')\
             or _type.startswith('Decrease')
+
+def is_unsigned_stmt_type(_type):
+    types = ['Complex', 'Association', 'Statement', 'Event']
+    return _type in types
+
+def is_positive_stmt_type(_type):
+    return not is_negative_stmt_type(_type) and not is_unsigned_stmt_type(_type)
 
 
 def get_type(o):
