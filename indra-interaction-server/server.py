@@ -41,5 +41,7 @@ def find_interactions(entities, sign):
 
 port = read_from_config('PORT')
 
+print('waiting connection at localhost port:')
+print(port)
 httpd = HTTPServer(('localhost', port), SimpleHTTPRequestHandler)
 httpd.serve_forever()
