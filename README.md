@@ -1,9 +1,12 @@
 # IndraInteractionServer
 
 ## Installing the Dependencies
-```
-pip3 install requirements.txt
-````
+
+- Download [Bioagents](https://github.com/sorgerlab/bioagents) and add it to the PYTHONPATH.
+- Download [Bionetgen](https://www.csb.pitt.edu/Faculty/Faeder/?page_id=409) add add it to the PYTHONPATH.
+- Set envrionment variables ``INDRA_DB_REST_URL`` and ``INDRA_DB_REST_API_KEY``as it is mentioned [here](https://indra.readthedocs.io/en/latest/modules/sources/indra_db_rest/#module-indra.sources.indra_db_rest).
+- Run ``pip3 install requirements.txt``.
+
 ## Configuration
 
 The configurations can be made by using the following environment variables:
