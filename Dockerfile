@@ -1,3 +1,4 @@
+ARG indra_db_api_key
 FROM ubuntu:latest
 
 RUN apt-get update \
@@ -29,4 +30,9 @@ RUN pip3 install -r requirements.txt
 
 RUN chmod +x /app/indra-interaction-server/server.py
 EXPOSE 8000
+
+ENV INDRA_DB_REST_URL=https://db.indra.bio
+ENV INDRA_DB_REST_API_KEY=$indra_db_api_key
+ENV HOST='0.0.0.0'
+
 ENTRYPOINT [ "python3", "/app/indra-interaction-server/server.py" ]

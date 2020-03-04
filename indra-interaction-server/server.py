@@ -40,8 +40,8 @@ def find_interactions(entities, sign):
     return interactionFinderJsonStr(entities, sign)
 
 port = read_from_config('PORT')
+host = read_from_config('HOST')
 
-print('waiting connection at localhost port:')
-print(port)
-httpd = HTTPServer(('localhost', port), SimpleHTTPRequestHandler)
+print('waiting connection at {host}:{port}'.format(host=host, port=port))
+httpd = HTTPServer((host, port), SimpleHTTPRequestHandler)
 httpd.serve_forever()
