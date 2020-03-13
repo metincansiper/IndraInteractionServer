@@ -23,6 +23,9 @@ python3 server.py
 
 ## DOCKER
 ```
+# Default build
+docker build  -f Dockerfile -t indra_intn_server .
+# Build with optional argument `indra_db_api_key`
 docker build --build-arg indra_db_api_key=<YOUR_INDRA_DB_API_KEY> -f Dockerfile -t indra_intn_server .
 docker run -d -it -p <port>:8000 indra_intn_server
 ```
